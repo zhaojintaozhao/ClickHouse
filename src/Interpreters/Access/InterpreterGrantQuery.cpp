@@ -117,7 +117,7 @@ namespace
     void checkGranteeIsAllowed(const ContextAccess & current_user_access, const UUID & grantee_id, const IAccessEntity & grantee)
     {
         auto current_user = current_user_access.getUser();
-        if (current_user && !current_user->grantees.match(grantee_id))
+        if (!current_user || !current_user->grantees.match(grantee_id))
             throw Exception(grantee.formatTypeWithName() + " is not allowed as grantee", ErrorCodes::ACCESS_DENIED);
     }
 
@@ -125,7 +125,7 @@ namespace
     void checkGranteesAreAllowed(const AccessControl & access_control, const ContextAccess & current_user_access, const std::vector<UUID> & grantee_ids)
     {
         auto current_user = current_user_access.getUser();
-        if (!current_user || (current_user->grantees == RolesOrUsersSet::AllTag{}))
+        if (current_user && (current_user->grantees == RolesOrUsersSet::AllTag{}))
             return;
 
         for (const auto & id : grantee_ids)
